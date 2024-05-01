@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>games platform</title>
+    <style>
+        body {
+            background-image: url(./img/city.jpg);
+            background-size: cover;
+            font-family: sans-serif;
+        }
+        .homepage{
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .login-box {
+            z-index: 1;
+            width: 600px;
+            margin: 50px auto;
+            padding: 50px;
+            border: 1px rgb(187, 186, 186) solid;
+            border-radius: 15px;
+            background: white;
+        }
+        .login-form {
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            padding: 30px 0;
+            color: #333
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!--    <link rel="stylesheet" href="./plugins/font-awesome/css/font-awesome.min.css">-->
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="app">
+    <div class="homepage">
+        <div class="login-box">
+            <div class="login-form">Login</div>
+            <el-form ref="form" :model="form" size="normal" :rules="rules">
+                <el-form-item prop="username">
+                    <el-input prefix-icon="el-icon-user" v-model="form.username" placeholder="Username"></el-input>
+                </el-form-item>
+                <el-form-item prop="password">
+                    <el-input  prefix-icon="el-icon-lock" type="password" v-model="form.password"  placeholder="Password"></el-input>
+                </el-form-item>
+                <el-form-item>
+
+<!--                        </el-form-item>-->
+<!--                                <el-form-item>-->
+<!--                                  <el-radio v-model="form.role" :label="1" style="color: white">admin</el-radio>-->
+<!--                                  <el-radio v-model="form.role" :label="2" style="color: white">ordinary user</el-radio>-->
+<!--                                </el-form-item>-->
+<!--                        <el-form-item>-->
+                    <el-button style="width: 100%;" id="check-btn2" type="primary" @click="login">Log In</el-button>
+                </el-form-item>
+                <div style="text-align: center">
+                    Not a member?
+                    <el-button style="font-size: 16px" type="text" @click="register">Register now</el-button>
+                </div>
+            </el-form>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="./js/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!--<script type="text/javascript" src="./js/jquery.min.js"></script>-->
+<script src="./js/axios-0.18.0.js"></script>
+<!--mouse special effects-->
+<script type="text/javascript" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.min.js"></script>　　
+
+<script>
+    //axios global config
+    // axios.defaults.headers['token'] = window.localStorage.getItem("token");
+    var vue = new Vue({
+        el: '#app',
+        data() {
+            return {
+                form: {
+                    username: '',
+                    password: ''
+                },
+                rules: {
+                    username: [
+                        {required: true, message: 'Username required', trigger: 'blur'},
+                    ],
+                    password: [
+                        {required: true, message: 'Password required', trigger: 'blur'},
+                    ],
+                },
+            }
+        },
+        // mounted() {
+        //     localStorage.removeItem("username");
+        // },
+        methods: {
+            login() {
+                this.$refs['form'].validate((valid) => {
+                    if (valid) {
+                        // localStorage.setItem("username",this.form.username);
+                        axios.post("/user/login", this.form).then(res => {
+                            //res = {config, data:{err,message,data}, ....}
+                            if (!res.data.err) {
+                                this.$message({
+                                    type: "success",
+                                    message: res.data.message
+                                });
+                                window.location.href="./pages/main.html";
+                                // else{
+                                //     window.location.href="./pages/main_user.html";
+                                // }
+                            } else {
+                                //fail
+                                this.$message.error(res.data.message);
+                            }
+                        });
+                    }
+                })
+            },
+            register() {
+                window.location.href="./register.html";
+            },
+        }
+    });
+</script>
+</html>

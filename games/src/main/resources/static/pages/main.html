@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Games management</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        html,body{
+            height: 100%;
+        }
+        .el-main{
+            position: absolute;
+            top: 70px;
+            bottom: 0px;
+            left: 200px;
+            right: 10px;
+            padding: 0;
+        }
+        .avatar-wrapper{
+            color: black;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-purple sidebar-mini">
+<div id="app" style="height:100%;">
+    <el-container style="height:100%;">
+        <el-header  class="main-header" style="height:70px;">
+            <nav class="navbar navbar-static-top">
+                <span style="font-family:Microsoft YaHei;font-size:25px" class="logo">Games Management System</span>
+
+                <div class="right-menu" style="margin-top: 10px">
+                    <el-dropdown class="avatar-container right-menu-item" trigger="click">
+                        <div class="avatar-wrapper" style="font-size: 15px">
+                            Welcome, {{name}}
+                        </div>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item divided>
+                                <el-button  round type="danger" size="mini" @click="getBalance()">Current Balance</el-button>
+                            </el-dropdown-item>
+<!--                            <el-dropdown-item divided>-->
+<!--                                <el-button  round type="danger" size="mini" @click="updatepassword()">Update password</el-button>-->
+<!--                            </el-dropdown-item>-->
+                            <el-dropdown-item divided>
+                                <el-button round type="danger" size="mini" @click="logout()" >Log out</el-button>
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </div>
+            </nav>
+        </el-header>
+        <el-container style="height:100%;">
+            <el-aside width="230px">
+                <el-menu style="font-size: 20px">
+                    <el-submenu v-for="menu in menuList" :index="menu.path">
+                        <template slot="title">
+                            <i class="fa" :class="menu.icon"></i>
+                            {{menu.title}}
+                        </template>
+                        <template v-for="child in menu.children">
+                            <el-menu-item :index="child.path">
+                                <a :href="child.linkUrl" target="right">{{child.title}}</a>
+                            </el-menu-item>
+                        </template>
+                    </el-submenu>
+                </el-menu>
+            </el-aside>
+            <el-container>
+                <iframe name="right"  src="gameList.html" width="100%"  height="100%" frameborder="0"></iframe>
+            </el-container>
+        </el-container>
+    </el-container>
+
+    <div class="add-form">
+        <el-dialog title="Update password" :visible.sync="dialogFormVisible4Edit">
+            <el-form ref="dataEditForm" :model="formData" :rules="rules" label-position="right" label-width="100px">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="old password" prop="oldpwd">
+                            <el-input type="password"  v-model="formData.oldpwd"/>
+                        </el-form-item>
+                    </el-col>
+
+                </el-row>
+
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="new password" prop="newpwd">
+                            <el-input  prefix-icon="el-icon-edit" type="password" v-model="formData.newpwd"/>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="confirm your password" prop="confirm">
+                            <el-input prefix-icon="el-icon-edit" type="password" v-model="formData.confirm"/>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible4Edit = false">cancel</el-button>
+                <el-button type="primary" @click="handleEdit()">yes</el-button>
+            </div>
+        </el-dialog>
+    </div>
+</div>
+</body>
+
+<script src="../js/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data:{
+            name:"dss",
+            balance: 0,
+            menuList:[
+                {
+                    "path": "1",
+                    "title": "Games Management",
+                    "icon":"fa-book",
+                    "children": [
+                        {
+                            "path": "/1-1",
+                            "title": "Games List",
+                            "linkUrl":"gameList.html",
+                            "children":[]
+                        }
+                    ]
+                },
+                {
+                    "path": "2",
+                    "title": "Purchase Management",
+                    "icon":"fa-pencil",
+                    "children":[
+                        {
+                            "path": "/2-1",
+                            "title": "Purchase Records",
+                            "linkUrl":"purchase.html",
+                            "children":[]
+                        },
+                    ]
+                },
+                {
+                    "path": "3",
+                    "title": "Like Management",
+                    "icon":"fa-cog",
+                    "children":[
+                        {
+                            "path": "/3-1",
+                            "title": "Like Records",
+                            "linkUrl":"like.html",
+                            "children":[]
+                        }
+                    ]
+                },
+            ],
+            dialogFormVisible4Edit:false,
+            rules: {
+                oldpwd: [
+                    {required: true, message: 'Old password required', trigger: 'blur'},
+                ],
+                newpwd: [
+                    {required: true, message: 'New password required', trigger: 'blur'},
+                ],
+                confirm: [
+                    {required: true, message: 'Please confirm your password', trigger: 'blur'},
+                ]
+            },
+            formData: {}
+        },
+        mounted(){
+            axios.get("/user/getName").then(res => {
+                if(!res.data.err){
+                    this.name = res.data.data;
+                }
+            });
+        },
+        methods:{
+            GetQueryString(key)
+            {
+                /*var reg = new RegExp("(^|&)"+ decodeURI(decodeURI(name)) +"=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if(r!=null)return  unescape(r[2]); return null;*/
+
+                var url = window.location.search;
+
+                var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+
+                var result = url.substr(1).match(reg);
+
+                return result ? decodeURIComponent(result[2]) : null;
+            },
+            getBalance(){
+                axios.get("/user/getBalance").then(res => {
+                    if (!res.data.err) {
+                        this.$message({
+                            type: 'success',
+                            message: "Current Balance : " + res.data.data
+                        });
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.message
+                        });
+                    }
+                });
+            },
+            logout(){
+                this.$confirm("Are you sure to log out？",{
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No',
+                    type: 'warning'
+                }).then(()=>{
+                    axios.get("/user/logout").then(res => {
+                        if(!res.data.err){
+                            this.$message({
+                                type:'success',
+                                message:"Log out succeeded",
+                            });
+                            this.index();
+                        }else{
+                            this.$message.error(res.data.message);
+                        }
+                    });
+                }).catch(()=>{
+                    this.$message({
+                        type:'info',
+                        message:'Canceled'
+                    });
+                });
+            },
+            resetForm() {
+                this.formData = {};
+                //this.formData.oldpwd=null;
+                //this.formData.newpwd=null;
+                //this.formData.confirm=null;
+                //alert( this.formData.username);
+            },
+            updatepassword(){
+                this.dialogFormVisible4Edit = true;
+                this.resetForm();
+            },
+            handleEdit(){
+                if (this.formData.newpwd !== this.formData.confirm) {
+                    this.$message({
+                        type: "error",
+                        message: '！'
+                    })
+                    return
+                }
+                this.$refs['dataEditForm'].validate((valid) => {
+                    if (valid) {
+                        axios.post("/user/updatepwd", this.formData).then(res => {
+                            if (res.data.flag) {
+                                this.$message({
+                                    type: 'success',
+                                    message: res.data.message
+
+                                });
+                            }
+                            else
+                            {
+                                this.$message({
+                                    type: 'error',
+                                    message: res.data.message
+
+                                });
+                            }
+                            this.dialogFormVisible4Edit = false;
+                        })
+                    }else{
+                        //校验不通过
+                        this.$message.error("！");
+                        return false;
+                    }
+
+                })
+            },
+            index(){
+                window.location.href="../index.html";
+            }
+        },
+    });
+    $(function() {
+        var wd = 200;
+        $(".el-main").css('width', $('body').width() - wd + 'px');
+    });
+</script>
+</html>

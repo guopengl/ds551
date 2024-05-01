@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Like Management</title>
+
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>Like Management<small>Like Records</small></h1>
+        <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+            <el-breadcrumb-item :to="{ path: '/' }">Home page</el-breadcrumb-item>
+            <el-breadcrumb-item>Like Management</el-breadcrumb-item>
+            <el-breadcrumb-item>Like Records</el-breadcrumb-item>
+        </el-breadcrumb>
+    </div>
+    <div class="app-container">
+        <div class="box">
+<!--            <div class="filter-container">-->
+<!--                <el-input placeholder="Game Name" suffix-icon="el-icon-search" v-model="pagination.queryString" style="width: 200px;" class="filter-item"></el-input>-->
+<!--                <el-button @click="findPage()" class="dalfBut">Search</el-button>-->
+<!--            </div>-->
+            <el-table size="small" current-row-key="id" :data="paginatedData" stripe highlight-current-row>
+                <el-table-column type="index" align="center" label="id"></el-table-column>
+                <el-table-column prop="gameName" label="gameName" align="center"></el-table-column>
+                <el-table-column prop="_id.timestamp" label="date" align="center" :formatter="formatDate"></el-table-column>
+
+                <el-table-column label="operations" align="center">
+                    <template slot-scope="scope">
+                        <el-button size="mini" type="danger" @click="cancelLike(scope.row)">Cancel Like</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="pagination-container">
+                <el-pagination
+                        class="pagiantion"
+                        @current-change="handleCurrentChange"
+                        :current-page="pagination.currentPage"
+                        :page-size="pagination.pageSize"
+                        layout="total, prev, pager, next, jumper"
+                        :total="total">
+                </el-pagination>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="../js/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="//unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script>
+    ELEMENT.locale(ELEMENT.lang.en);
+    var vue = new Vue({
+        el: '#app',
+        data:{
+            pagination: {
+                currentPage: 1,
+                pageSize:10,
+                total:0,
+                queryString:null,
+                bookname:null,
+            },
+            dataList: []
+        },
+        created() {
+            axios.get("/like/find").then(res => {
+                if(!res.data.err){
+                    this.dataList = res.data.data;
+                }
+            });
+        },
+        computed:{
+            paginatedData(){
+                const startIndex = (this.pagination.currentPage - 1) * this.pagination.pageSize;
+                const endIndex = startIndex + this.pagination.pageSize;
+                return this.dataList.slice(startIndex, endIndex);
+            },
+            total(){
+                return this.dataList.length;
+            }
+        },
+        methods: {
+            formatDate(r, c, value){
+                console.log(value);
+                if(value){
+                    const date = new Date(value * 1000);
+                    return date.toLocaleDateString();
+                }
+                return "---";
+            },
+            handleCurrentChange(currentPage) {
+                this.pagination.currentPage = currentPage;
+            },
+            cancelLike(row) {
+                this.$confirm("Are you sure to cancel this like？","Prompt",{
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No',
+                    type:'warning'
+                }).then(()=>{
+                    axios.post("/like/delete",{
+                        "gameName": row.gameName
+                    }).then((res) => {
+                        if(!res.data.err){
+                            this.$message({
+                                type:'success',
+                                message:"Cancel Like succeeded"
+                            });
+                            axios.get("/like/find").then(res => {
+                                if(!res.data.err){
+                                    this.dataList = res.data.data;
+                                }
+                            });
+                        }else{
+                            this.$message.error(res.data.message);
+                        }
+                    });
+                }).catch(()=>{
+                    this.$message({
+                        type:'info',
+                        message:'canceled'
+                    });
+                });
+            }
+        }
+    })
+</script>
+</html>

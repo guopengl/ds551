@@ -70,7 +70,7 @@ public class DDLService {
                 for(int i = 0; i < ClusterConfig.getNumDatabases(); i++){
                     mongoClient.getDatabase("db" + i).createCollection(session, collectionName);
                 }
-                Document doc = new Document().append("id", ClusterConfig.getTablesInfo().size())
+                Document doc = new Document().append("id", ClusterConfig.getTablesInfo().size()+1)
                         .append("tableName", collectionName).append("partitionKey", request.getPartitionKey());
                 mongoClient.getDatabase("db0").getCollection("conf").insertOne(session, doc);
                 ClusterConfig.getTablesInfo().put(collectionName, new TableParams(

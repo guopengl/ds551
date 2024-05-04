@@ -1,5 +1,7 @@
 To run the program locally:
-1. Start mongodb service on port 27017, create two databases named 'db0' and 'db1',
+1. Make the mongodb service a single node replica set to enable cross-databases transactions. https://www.mongodb.com/docs/manual/tutorial/convert-standalone-to-replica-set/
+
+   Start mongodb service on port 27017, create two databases named 'db0' and 'db1',
    create a collection named 'conf' in db0, insert a row {'numDatabases' : 2}.
 2. Run Distributed-Mongodb as Spring Application, where edu.guopengl.Application is the Main class.
 3. Run the following in command line:
